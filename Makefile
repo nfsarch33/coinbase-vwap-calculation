@@ -7,7 +7,6 @@ scenario=all
 
 install:
 	@go mod tidy
-	@go build -o $(CompiledFileName) cmd/vwap/main.go
 
 clean:
 	@rm -f $(CompiledFileName)
@@ -18,7 +17,7 @@ build:
 run:
 	@go run cmd/vwap/main.go
 
-unit_test:
+test:
 	@go test -v -race -timeout 10000s -covermode=atomic -coverpkg=./... -coverprofile=unit_test.raw.out $(TestInclusion)
 
 lint_ci:

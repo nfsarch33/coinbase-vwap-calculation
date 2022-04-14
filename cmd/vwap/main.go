@@ -15,17 +15,17 @@ import (
 )
 
 const (
-	DefaultWebSocketURL   = "wss://ws-feed.pro.coinbase.com"
+	DefaultWebSocketURL   = "wss://ws-feed.exchange.coinbase.com"
 	DefaultLogLevel       = logrus.FatalLevel
 	DefaultPairs          = "BTC-USD,ETH-USD,ETH-BTC"
 	DefaultVwapWindowSize = 200
 )
 
 var (
-	queryPairs     = flag.String("dy", DefaultPairs, "comma separated list of pairs to query")
+	queryPairs     = flag.String("pairs", DefaultPairs, "comma separated list of pairs to query")
 	verbose        = flag.Bool("verbose", false, "verbose logging")
-	wsURL          = flag.String("ws-url", DefaultWebSocketURL, "websocket url")
-	vwapWindowSize = flag.Int("vwap-window", DefaultVwapWindowSize, "vwap window size")
+	wsURL          = flag.String("wsurl", DefaultWebSocketURL, "websocket url")
+	vwapWindowSize = flag.Int("window-size", DefaultVwapWindowSize, "vwap window size")
 )
 
 func main() {

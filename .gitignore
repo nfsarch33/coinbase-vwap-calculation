@@ -31,3 +31,4 @@ log.txt
 *.log
 *.tmp
 unit_test.raw*
+.history
