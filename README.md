@@ -84,7 +84,7 @@ The project is structured as follows:
 * VWAP calculator - calculates the VWAP for a given datapoint window.
 * The command line entry point - the `main.go` file brings all the components together.
 
-- Generic Clients
+### Generic Clients
 
   In `internal/clients` directory, there's a generic websocket client for connecting and getting the websocket feeds.
 
@@ -92,7 +92,7 @@ The project is structured as follows:
 
   For future extensions, more generic client packages such as general gRPC and REST clients can be added in `internal/client` directory.
 
-- Downstream Services
+### Downstream Services
 
   In `internal/services` directory, there's a streaming service for providing the aggregated VWAP data to the other consumer components of the project.
 
@@ -102,7 +102,7 @@ The project is structured as follows:
 
   The service handler `CoinbaseSteamDataHandler` has a `messagePipelineFunc` function property, that can be further implemented to handle the data pipelining for sending it to a message queue or a database.
 
-- VWAP Calculation
+### VWAP Calculation
   
   In `internal/vwap` directory, `vwap.go` file contains the VWAP data structure and the calculation logic.
 
@@ -120,13 +120,14 @@ The project is structured as follows:
   the calculation of the VWAP a simple addition and subtraction of the price and volume data. This effectively make the
   calculation of the VWAP a constant time operation with a time complexity of O(1).
 
-- Currency and floating point precision
+### Currency and floating point precision
 
   For financial and currency calculations, the precision of the floating point numbers is important to avoid decimal
   fraction problems.
 
-  At ANZ, we use the `[anz-bank/decimal](https://github.com/anz-bank/decimal)` package to handle the floating point
+  At ANZ, we use the [anz-bank/decimal](https://github.com/anz-bank/decimal) package to handle the floating point
   precision and conversion.
 
   However, since the project is really simple one with only a few calculations upon receiving price data, so we just use
-  a common `big.Float` data precision form `math/big` package.
+  a common `big.Float` precision form `math/big` package. In the future, if the project gets more complicated, we can use
+  one of these packages to handle the floating point precision further.
