@@ -1,12 +1,11 @@
 package handler
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"bitbucket.org/keynear/coinbase-vwap-calculation/internal/services/streaming"
 	"bitbucket.org/keynear/coinbase-vwap-calculation/internal/services/streaming/coinbase"
 	"bitbucket.org/keynear/coinbase-vwap-calculation/internal/vwap"
+	"encoding/json"
+	"fmt"
 	"github.com/sirupsen/logrus"
 )
 
@@ -76,7 +75,7 @@ func (h *CoinbaseSteamDataHandler) Handle() error {
 					Type:      f.Type,
 					Size:      f.Size,
 					Price:     f.Price,
-					ProductId: f.ProductId,
+					ProductID: f.ProductID,
 				}
 
 				err = h.processVwapData(dataPoint)
@@ -87,7 +86,7 @@ func (h *CoinbaseSteamDataHandler) Handle() error {
 
 				// TODO: Implement message pipeline function to send it to the message blocker or DB.
 				if h.messagePipelineFunc != nil {
-					err := h.messagePipelineFunc(h.vwapData[dataPoint.ProductId])
+					err := h.messagePipelineFunc(h.vwapData[dataPoint.ProductID])
 					if err != nil {
 						h.logger.Errorf("Error processing vwap data %s", err)
 						continue
@@ -101,16 +100,16 @@ func (h *CoinbaseSteamDataHandler) Handle() error {
 }
 
 func (h *CoinbaseSteamDataHandler) processVwapData(dataPoint vwap.DataPoint) error {
-	if _, ok := h.vwapData[dataPoint.ProductId]; !ok {
-		h.vwapData[dataPoint.ProductId] = vwap.NewSlidingWindow(h.vwapMaxSize, dataPoint.ProductId)
+	if _, ok := h.vwapData[dataPoint.ProductID]; !ok {
+		h.vwapData[dataPoint.ProductID] = vwap.NewSlidingWindow(h.vwapMaxSize, dataPoint.ProductID)
 	}
 
-	h.vwapData[dataPoint.ProductId].Add(dataPoint)
+	h.vwapData[dataPoint.ProductID].Add(dataPoint)
 
 	fmt.Printf(
 		"%v\t:%v\n",
-		dataPoint.ProductId,
-		h.vwapData[dataPoint.ProductId].GetCalculator().Avg().String())
+		dataPoint.ProductID,
+		h.vwapData[dataPoint.ProductID].GetCalculator().Avg().String())
 
 	return nil
 }

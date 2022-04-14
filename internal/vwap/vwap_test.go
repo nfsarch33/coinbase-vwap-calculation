@@ -1,6 +1,7 @@
 package vwap
 
 import (
+	"fmt"
 	"math/big"
 	"reflect"
 	"sync"
@@ -48,7 +49,6 @@ func TestNewSlidingWindow(t *testing.T) {
 
 func TestSlidingWindow_Add(t *testing.T) {
 	type fields struct {
-		mux          sync.Mutex
 		currencyPair string
 		dataPoints   []DataPoint
 		windowSize   int
@@ -76,7 +76,7 @@ func TestSlidingWindow_Add(t *testing.T) {
 					Price:     big.NewFloat(100.0),
 					Size:      big.NewFloat(1.355559),
 					Type:      "match",
-					ProductId: "BTC-USD",
+					ProductID: "BTC-USD",
 				},
 			},
 		},
@@ -84,7 +84,6 @@ func TestSlidingWindow_Add(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sw := &SlidingWindow{
-				mux:          tt.fields.mux,
 				currencyPair: tt.fields.currencyPair,
 				dataPoints:   tt.fields.dataPoints,
 				windowSize:   tt.fields.windowSize,
@@ -97,7 +96,6 @@ func TestSlidingWindow_Add(t *testing.T) {
 
 func TestSlidingWindow_Add_Multiple(t *testing.T) {
 	type fields struct {
-		mux          sync.Mutex
 		currencyPair string
 		dataPoints   []DataPoint
 		windowSize   int
@@ -127,61 +125,61 @@ func TestSlidingWindow_Add_Multiple(t *testing.T) {
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(1.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 				},
 			},
@@ -191,7 +189,6 @@ func TestSlidingWindow_Add_Multiple(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sw := &SlidingWindow{
-				mux:          tt.fields.mux,
 				currencyPair: tt.fields.currencyPair,
 				dataPoints:   tt.fields.dataPoints,
 				windowSize:   tt.fields.windowSize,
@@ -201,8 +198,8 @@ func TestSlidingWindow_Add_Multiple(t *testing.T) {
 			for _, dataPoint := range tt.args.dataPoints {
 				sw.Add(dataPoint)
 			}
-			if got := sw.GetLength(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetLength() = %v, want %v", got, tt.want)
+			if got := sw.Length(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Length() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -210,7 +207,6 @@ func TestSlidingWindow_Add_Multiple(t *testing.T) {
 
 func TestSlidingWindow_GetCalculator(t *testing.T) {
 	type fields struct {
-		mux          sync.Mutex
 		currencyPair string
 		dataPoints   []DataPoint
 		windowSize   int
@@ -239,7 +235,6 @@ func TestSlidingWindow_GetCalculator(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sw := &SlidingWindow{
-				mux:          tt.fields.mux,
 				currencyPair: tt.fields.currencyPair,
 				dataPoints:   tt.fields.dataPoints,
 				windowSize:   tt.fields.windowSize,
@@ -254,7 +249,6 @@ func TestSlidingWindow_GetCalculator(t *testing.T) {
 
 func TestSlidingWindow_Add_Avg(t *testing.T) {
 	type fields struct {
-		mux          sync.Mutex
 		currencyPair string
 		dataPoints   []DataPoint
 		windowSize   int
@@ -284,61 +278,61 @@ func TestSlidingWindow_Add_Avg(t *testing.T) {
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(0.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(3100.0),
 						Size:      big.NewFloat(2.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(150.0),
 						Size:      big.NewFloat(12.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(5100.0),
 						Size:      big.NewFloat(25.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(6100.0),
 						Size:      big.NewFloat(2.352239),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(5100.0),
 						Size:      big.NewFloat(21.661324),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(31100.0),
 						Size:      big.NewFloat(21.32559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(51100.0),
 						Size:      big.NewFloat(41.255559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(61100.0),
 						Size:      big.NewFloat(71.64587),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(81100.0),
 						Size:      big.NewFloat(92.25539),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 				},
 			},
@@ -348,7 +342,6 @@ func TestSlidingWindow_Add_Avg(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sw := &SlidingWindow{
-				mux:          tt.fields.mux,
 				currencyPair: tt.fields.currencyPair,
 				dataPoints:   tt.fields.dataPoints,
 				windowSize:   tt.fields.windowSize,
@@ -368,7 +361,6 @@ func TestSlidingWindow_Add_Avg(t *testing.T) {
 
 func TestSlidingWindow_Add_Concurrent_Avg(t *testing.T) {
 	type fields struct {
-		mux          sync.Mutex
 		currencyPair string
 		dataPoints   []DataPoint
 		windowSize   int
@@ -398,31 +390,31 @@ func TestSlidingWindow_Add_Concurrent_Avg(t *testing.T) {
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(0.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(3100.0),
 						Size:      big.NewFloat(2.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(150.0),
 						Size:      big.NewFloat(12.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(5100.0),
 						Size:      big.NewFloat(25.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(6100.0),
 						Size:      big.NewFloat(2.352239),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 				},
 			},
@@ -432,7 +424,6 @@ func TestSlidingWindow_Add_Concurrent_Avg(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sw := &SlidingWindow{
-				mux:          tt.fields.mux,
 				currencyPair: tt.fields.currencyPair,
 				dataPoints:   tt.fields.dataPoints,
 				windowSize:   tt.fields.windowSize,
@@ -450,8 +441,8 @@ func TestSlidingWindow_Add_Concurrent_Avg(t *testing.T) {
 			}
 			wg.Wait()
 
-			if got := sw.GetLength(); !reflect.DeepEqual(got, tt.fields.windowSize) {
-				t.Errorf("GetLength() = %v, want %v", got, tt.fields.windowSize)
+			if got := sw.Length(); !reflect.DeepEqual(got, tt.fields.windowSize) {
+				t.Errorf("Length() = %v, want %v", got, tt.fields.windowSize)
 			}
 
 			if got := sw.GetCalculator().Avg().String(); !reflect.DeepEqual(got, tt.want.String()) {
@@ -463,7 +454,6 @@ func TestSlidingWindow_Add_Concurrent_Avg(t *testing.T) {
 
 func TestSlidingWindow_Add_Concurrent_Size(t *testing.T) {
 	type fields struct {
-		mux          sync.Mutex
 		currencyPair string
 		dataPoints   []DataPoint
 		windowSize   int
@@ -483,8 +473,8 @@ func TestSlidingWindow_Add_Concurrent_Size(t *testing.T) {
 			name: "TestSlidingWindow_Add_Concurrent_Size",
 			fields: fields{
 				currencyPair: "BTC-USD",
-				dataPoints:   []DataPoint{},
-				windowSize:   3,
+				dataPoints:   make([]DataPoint, 0),
+				windowSize:   2,
 				calculator:   *utils.NewVolumeWeightedAveragePriceCalculator(),
 			},
 			args: args{
@@ -493,60 +483,64 @@ func TestSlidingWindow_Add_Concurrent_Size(t *testing.T) {
 						Price:     big.NewFloat(100.0),
 						Size:      big.NewFloat(0.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(3100.0),
 						Size:      big.NewFloat(2.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(150.0),
 						Size:      big.NewFloat(12.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(5100.0),
 						Size:      big.NewFloat(25.355559),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 					{
 						Price:     big.NewFloat(6100.0),
 						Size:      big.NewFloat(2.352239),
 						Type:      "match",
-						ProductId: "BTC-USD",
+						ProductID: "BTC-USD",
 					},
 				},
 			},
-			want: 3,
+			want: 2,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sw := &SlidingWindow{
-				mux:          tt.fields.mux,
 				currencyPair: tt.fields.currencyPair,
 				dataPoints:   tt.fields.dataPoints,
 				windowSize:   tt.fields.windowSize,
 				calculator:   tt.fields.calculator,
 			}
 
-			count := len(tt.args.dataPoints)
 			var wg sync.WaitGroup
-			wg.Add(count)
+			testLength := len(tt.args.dataPoints)
+			fmt.Println("testLength", testLength)
+			wg.Add(testLength)
+
 			for _, dataPoint := range tt.args.dataPoints {
-				go func(dataPoint DataPoint) {
+				dataPoint := dataPoint
+				go func() {
+					fmt.Println("dataPoint", dataPoint)
 					sw.Add(dataPoint)
-					wg.Done()
-				}(dataPoint)
+					defer wg.Done()
+				}()
 			}
+
 			wg.Wait()
 
-			if got := sw.GetLength(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetLength() = %v, want %v", got, tt.want)
+			if got := sw.Length(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Length() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -554,7 +548,6 @@ func TestSlidingWindow_Add_Concurrent_Size(t *testing.T) {
 
 func TestSlidingWindow_SetSize(t *testing.T) {
 	type fields struct {
-		mux          sync.Mutex
 		currencyPair string
 		dataPoints   []DataPoint
 		windowSize   int
@@ -587,14 +580,13 @@ func TestSlidingWindow_SetSize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sw := &SlidingWindow{
-				mux:          tt.fields.mux,
 				currencyPair: tt.fields.currencyPair,
 				dataPoints:   tt.fields.dataPoints,
 				windowSize:   tt.fields.windowSize,
 				calculator:   tt.fields.calculator,
 			}
 			sw.SetSize(tt.args.maxSize)
-			if got := sw.GetSize(); !reflect.DeepEqual(got, tt.want) {
+			if got := sw.Size(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetCalculator() = %v, want %v", got, tt.want)
 			}
 		})
@@ -603,7 +595,6 @@ func TestSlidingWindow_SetSize(t *testing.T) {
 
 func TestSlidingWindow_GetSize(t *testing.T) {
 	type fields struct {
-		mux          sync.Mutex
 		currencyPair string
 		dataPoints   []DataPoint
 		windowSize   int
@@ -620,14 +611,13 @@ func TestSlidingWindow_GetSize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sw := &SlidingWindow{
-				mux:          tt.fields.mux,
 				currencyPair: tt.fields.currencyPair,
 				dataPoints:   tt.fields.dataPoints,
 				windowSize:   tt.fields.windowSize,
 				calculator:   tt.fields.calculator,
 			}
-			if got := sw.GetSize(); got != tt.want {
-				t.Errorf("GetSize() = %v, want %v", got, tt.want)
+			if got := sw.Size(); got != tt.want {
+				t.Errorf("Size() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -10,6 +10,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	WsURLSandbox = "wss://ws-feed-public.sandbox.exchange.coinbase.com"
+	ReqString    = `{"type":"subscribe","product_ids":["BTC-USD"],"channels":{ "name": "matches", "product_ids": ["BTC-USD"]}}`
+)
+
 func TestNewStreamer(t *testing.T) {
 	type args struct {
 		ctx     context.Context
@@ -18,10 +23,9 @@ func TestNewStreamer(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	wsUrl := "wss://ws-feed-public.sandbox.exchange.coinbase.com"
-	request := "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[{\"name\":\"matches\",\"product_ids\":[\"BTC-USD\"]}]}"
 	logger := logrus.New()
-	streamer := NewStreamer(ctx, wsUrl, request)
+
+	streamer := NewStreamer(ctx, WsURLSandbox, ReqString)
 	wsClient := streamer.GetClient()
 	tests := []struct {
 		name string
@@ -32,15 +36,15 @@ func TestNewStreamer(t *testing.T) {
 		{
 			name: "TestNewStreamer",
 			args: args{
-				ctx:     context.Background(),
-				wsURL:   wsUrl,
-				request: request,
+				ctx:     ctx,
+				wsURL:   WsURLSandbox,
+				request: ReqString,
 			},
 			want: &Streamer{
-				ctx:     context.Background(),
-				wsURL:   wsUrl,
+				ctx:     ctx,
+				wsURL:   WsURLSandbox,
 				client:  wsClient,
-				request: request,
+				request: ReqString,
 				logger:  logger,
 			},
 		},
@@ -65,7 +69,11 @@ func TestStreamer_GetClient(t *testing.T) {
 		streamDataHandler streaming.StreamDataHandler
 		logger            *logrus.Logger
 	}
-	client := wsclient.NewClient(context.Background(), "wss://localhost:8080/")
+
+	ctx := context.Background()
+	logger := logrus.New()
+
+	client := wsclient.NewClient(ctx, WsURLSandbox)
 	tests := []struct {
 		name   string
 		fields fields
@@ -75,12 +83,12 @@ func TestStreamer_GetClient(t *testing.T) {
 		{
 			name: "TestStreamer_GetClient",
 			fields: fields{
-				ctx:               context.Background(),
-				wsURL:             "wss://localhost:8080/",
+				ctx:               ctx,
+				wsURL:             WsURLSandbox,
 				client:            client,
-				request:           "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"ticker\"]}",
+				request:           ReqString,
 				streamDataHandler: nil,
-				logger:            logrus.New(),
+				logger:            logger,
 			},
 			want: client,
 		},
@@ -111,7 +119,10 @@ func TestStreamer_GetContext(t *testing.T) {
 		streamDataHandler streaming.StreamDataHandler
 		logger            *logrus.Logger
 	}
+
 	ctx := context.Background()
+	logger := logrus.New()
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -122,11 +133,11 @@ func TestStreamer_GetContext(t *testing.T) {
 			name: "TestStreamer_GetContext",
 			fields: fields{
 				ctx:               ctx,
-				wsURL:             "wss://localhost:8080/",
+				wsURL:             WsURLSandbox,
 				client:            nil,
-				request:           "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"ticker\"]}",
+				request:           ReqString,
 				streamDataHandler: nil,
-				logger:            logrus.New(),
+				logger:            logger,
 			},
 			want: ctx,
 		},
@@ -157,7 +168,11 @@ func TestStreamer_SetLogger(t *testing.T) {
 		streamDataHandler streaming.StreamDataHandler
 		logger            *logrus.Logger
 	}
-	client := wsclient.NewClient(context.Background(), "wss://localhost:8080/")
+
+	ctx := context.Background()
+	logger := logrus.New()
+
+	client := wsclient.NewClient(ctx, WsURLSandbox)
 	type args struct {
 		logger *logrus.Logger
 	}
@@ -170,15 +185,15 @@ func TestStreamer_SetLogger(t *testing.T) {
 		{
 			name: "TestStreamer_SetLogger",
 			fields: fields{
-				ctx:               context.Background(),
-				wsURL:             "wss://localhost:8080/",
+				ctx:               ctx,
+				wsURL:             WsURLSandbox,
 				client:            client,
-				request:           "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"ticker\"]}",
+				request:           ReqString,
 				streamDataHandler: nil,
-				logger:            logrus.New(),
+				logger:            logger,
 			},
 			args: args{
-				logger: logrus.New(),
+				logger: logger,
 			},
 		},
 	}
@@ -206,6 +221,10 @@ func TestStreamer_SetStreamDataHandler(t *testing.T) {
 		streamDataHandler streaming.StreamDataHandler
 		logger            *logrus.Logger
 	}
+
+	ctx := context.Background()
+	logger := logrus.New()
+
 	type args struct {
 		streamDataHandler streaming.StreamDataHandler
 	}
@@ -218,12 +237,12 @@ func TestStreamer_SetStreamDataHandler(t *testing.T) {
 		{
 			name: "TestStreamer_SetStreamDataHandler",
 			fields: fields{
-				ctx:               context.Background(),
-				wsURL:             "wss://localhost:8080/",
+				ctx:               ctx,
+				wsURL:             WsURLSandbox,
 				client:            nil,
-				request:           "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"ticker\"]}",
+				request:           ReqString,
 				streamDataHandler: nil,
-				logger:            logrus.New(),
+				logger:            logger,
 			},
 			args: args{
 				streamDataHandler: nil,
@@ -254,8 +273,11 @@ func TestStreamer_Stop(t *testing.T) {
 		streamDataHandler streaming.StreamDataHandler
 		logger            *logrus.Logger
 	}
-	wsURL := "wss://ws-feed-public.sandbox.exchange.coinbase.com"
-	client := wsclient.NewClient(context.Background(), wsURL)
+
+	ctx := context.Background()
+	logger := logrus.New()
+
+	client := wsclient.NewClient(ctx, WsURLSandbox)
 	tests := []struct {
 		name   string
 		fields fields
@@ -264,12 +286,12 @@ func TestStreamer_Stop(t *testing.T) {
 		{
 			name: "TestStreamer_Stop",
 			fields: fields{
-				ctx:               context.Background(),
-				wsURL:             wsURL,
+				ctx:               ctx,
+				wsURL:             WsURLSandbox,
 				client:            client,
-				request:           "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"ticker\"]}",
+				request:           ReqString,
 				streamDataHandler: nil,
-				logger:            logrus.New(),
+				logger:            logger,
 			},
 		},
 	}
@@ -304,8 +326,11 @@ func TestStreamer_Stream(t *testing.T) {
 		streamDataHandler streaming.StreamDataHandler
 		logger            *logrus.Logger
 	}
-	wsURL := "wss://ws-feed.exchange.coinbase.com"
-	client := wsclient.NewClient(context.Background(), wsURL)
+
+	ctx := context.Background()
+	logger := logrus.New()
+
+	client := wsclient.NewClient(ctx, WsURLSandbox)
 	type args struct {
 		streamFeeds chan interface{}
 	}
@@ -320,11 +345,11 @@ func TestStreamer_Stream(t *testing.T) {
 			name: "TestStreamer_Stream",
 			fields: fields{
 				ctx:               context.Background(),
-				wsURL:             wsURL,
+				wsURL:             WsURLSandbox,
 				client:            client,
-				request:           "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"ticker\"]}",
+				request:           ReqString,
 				streamDataHandler: nil,
-				logger:            logrus.New(),
+				logger:            logger,
 			},
 			args: args{
 				streamFeeds: nil,

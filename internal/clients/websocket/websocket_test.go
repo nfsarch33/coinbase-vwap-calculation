@@ -12,12 +12,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	WsURLSandbox = "wss://ws-feed-public.sandbox.exchange.coinbase.com"
+	ReqString    = `{"type":"subscribe","product_ids":["BTC-USD"],"channels":{ "name": "matches", "product_ids": ["BTC-USD"]}}`
+)
+
 func TestClient_Close(t *testing.T) {
 	type fields struct {
 		Ctx               context.Context
 		Conn              *websocket.Conn
 		WebsocketDialer   *websocket.Dialer
-		Url               string
+		URL               string
 		ConnectionOptions ConnOptions
 		RequestHeader     http.Header
 		OnConnected       func(client Client)
@@ -40,7 +45,7 @@ func TestClient_Close(t *testing.T) {
 				Ctx:             context.Background(),
 				Conn:            nil,
 				WebsocketDialer: &websocket.Dialer{},
-				Url:             "wss://ws-feed-public.sandbox.exchange.coinbase.com",
+				URL:             WsURLSandbox,
 				ConnectionOptions: ConnOptions{
 					UseCompression: false,
 					UseSSL:         true,
@@ -64,7 +69,7 @@ func TestClient_Close(t *testing.T) {
 				Ctx:               tt.fields.Ctx,
 				Conn:              tt.fields.Conn,
 				WebsocketDialer:   tt.fields.WebsocketDialer,
-				URL:               tt.fields.Url,
+				URL:               tt.fields.URL,
 				ConnectionOptions: tt.fields.ConnectionOptions,
 				RequestHeader:     tt.fields.RequestHeader,
 				OnConnected:       tt.fields.OnConnected,
@@ -87,7 +92,7 @@ func TestClient_Connect(t *testing.T) {
 		Ctx               context.Context
 		Conn              *websocket.Conn
 		WebsocketDialer   *websocket.Dialer
-		Url               string
+		URL               string
 		ConnectionOptions ConnOptions
 		RequestHeader     http.Header
 		OnConnected       func(client Client)
@@ -112,7 +117,7 @@ func TestClient_Connect(t *testing.T) {
 				Ctx:             context.Background(),
 				Conn:            nil,
 				WebsocketDialer: &websocket.Dialer{},
-				Url:             "wss://ws-feed-public.sandbox.exchange.coinbase.com",
+				URL:             WsURLSandbox,
 				ConnectionOptions: ConnOptions{
 					UseCompression: false,
 					UseSSL:         true,
@@ -137,7 +142,7 @@ func TestClient_Connect(t *testing.T) {
 				Ctx:               tt.fields.Ctx,
 				Conn:              tt.fields.Conn,
 				WebsocketDialer:   tt.fields.WebsocketDialer,
-				URL:               tt.fields.Url,
+				URL:               tt.fields.URL,
 				ConnectionOptions: tt.fields.ConnectionOptions,
 				RequestHeader:     tt.fields.RequestHeader,
 				OnConnected:       tt.fields.OnConnected,
@@ -162,7 +167,7 @@ func TestClient_SendRequest(t *testing.T) {
 		Ctx               context.Context
 		Conn              *websocket.Conn
 		WebsocketDialer   *websocket.Dialer
-		Url               string
+		URL               string
 		ConnectionOptions ConnOptions
 		RequestHeader     http.Header
 		OnConnected       func(client Client)
@@ -191,7 +196,7 @@ func TestClient_SendRequest(t *testing.T) {
 				Ctx:             context.Background(),
 				Conn:            nil,
 				WebsocketDialer: &websocket.Dialer{},
-				Url:             "wss://ws-feed-public.sandbox.exchange.coinbase.com",
+				URL:             WsURLSandbox,
 				ConnectionOptions: ConnOptions{
 					UseCompression: false,
 					UseSSL:         true,
@@ -208,7 +213,7 @@ func TestClient_SendRequest(t *testing.T) {
 				logger:         logrus.New(),
 			},
 			args: args{
-				message: `{"type":"subscribe","product_ids":["BTC-USD"],"channels":["matches"]}`,
+				message: ReqString,
 			},
 			wantErr: false,
 		},
@@ -219,7 +224,7 @@ func TestClient_SendRequest(t *testing.T) {
 				Ctx:               tt.fields.Ctx,
 				Conn:              tt.fields.Conn,
 				WebsocketDialer:   tt.fields.WebsocketDialer,
-				URL:               tt.fields.Url,
+				URL:               tt.fields.URL,
 				ConnectionOptions: tt.fields.ConnectionOptions,
 				RequestHeader:     tt.fields.RequestHeader,
 				OnConnected:       tt.fields.OnConnected,
@@ -248,7 +253,7 @@ func TestClient_SetLogger(t *testing.T) {
 		Ctx               context.Context
 		Conn              *websocket.Conn
 		WebsocketDialer   *websocket.Dialer
-		Url               string
+		URL               string
 		ConnectionOptions ConnOptions
 		RequestHeader     http.Header
 		OnConnected       func(client Client)
@@ -276,7 +281,7 @@ func TestClient_SetLogger(t *testing.T) {
 				Ctx:             context.Background(),
 				Conn:            nil,
 				WebsocketDialer: &websocket.Dialer{},
-				Url:             "wss://ws-feed-public.sandbox.exchange.coinbase.com",
+				URL:             WsURLSandbox,
 				ConnectionOptions: ConnOptions{
 					UseCompression: false,
 					UseSSL:         true,
@@ -303,7 +308,7 @@ func TestClient_SetLogger(t *testing.T) {
 				Ctx:               tt.fields.Ctx,
 				Conn:              tt.fields.Conn,
 				WebsocketDialer:   tt.fields.WebsocketDialer,
-				URL:               tt.fields.Url,
+				URL:               tt.fields.URL,
 				ConnectionOptions: tt.fields.ConnectionOptions,
 				RequestHeader:     tt.fields.RequestHeader,
 				OnConnected:       tt.fields.OnConnected,
@@ -326,7 +331,7 @@ func TestClient_send(t *testing.T) {
 		Ctx               context.Context
 		Conn              *websocket.Conn
 		WebsocketDialer   *websocket.Dialer
-		Url               string
+		URL               string
 		ConnectionOptions ConnOptions
 		RequestHeader     http.Header
 		OnConnected       func(client Client)
@@ -356,7 +361,7 @@ func TestClient_send(t *testing.T) {
 				Ctx:             context.Background(),
 				Conn:            nil,
 				WebsocketDialer: &websocket.Dialer{},
-				Url:             "wss://ws-feed-public.sandbox.exchange.coinbase.com",
+				URL:             WsURLSandbox,
 				ConnectionOptions: ConnOptions{
 					UseCompression: false,
 					UseSSL:         true,
@@ -374,7 +379,7 @@ func TestClient_send(t *testing.T) {
 			},
 			args: args{
 				messageType: websocket.TextMessage,
-				data:        []byte("{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"]}"),
+				data:        []byte(ReqString),
 			},
 			wantErr: false,
 		},
@@ -385,7 +390,7 @@ func TestClient_send(t *testing.T) {
 				Ctx:               tt.fields.Ctx,
 				Conn:              tt.fields.Conn,
 				WebsocketDialer:   tt.fields.WebsocketDialer,
-				URL:               tt.fields.Url,
+				URL:               tt.fields.URL,
 				ConnectionOptions: tt.fields.ConnectionOptions,
 				RequestHeader:     tt.fields.RequestHeader,
 				OnConnected:       tt.fields.OnConnected,
@@ -414,7 +419,7 @@ func TestClient_setConnectionOptions(t *testing.T) {
 		Ctx               context.Context
 		Conn              *websocket.Conn
 		WebsocketDialer   *websocket.Dialer
-		Url               string
+		URL               string
 		ConnectionOptions ConnOptions
 		RequestHeader     http.Header
 		OnConnected       func(client Client)
@@ -438,7 +443,7 @@ func TestClient_setConnectionOptions(t *testing.T) {
 				Ctx:             context.Background(),
 				Conn:            nil,
 				WebsocketDialer: &websocket.Dialer{},
-				Url:             "wss://ws-feed-public.sandbox.exchange.coinbase.com",
+				URL:             WsURLSandbox,
 				ConnectionOptions: ConnOptions{
 					UseCompression: false,
 					UseSSL:         true,
@@ -462,7 +467,7 @@ func TestClient_setConnectionOptions(t *testing.T) {
 				Ctx:               tt.fields.Ctx,
 				Conn:              tt.fields.Conn,
 				WebsocketDialer:   tt.fields.WebsocketDialer,
-				URL:               tt.fields.Url,
+				URL:               tt.fields.URL,
 				ConnectionOptions: tt.fields.ConnectionOptions,
 				RequestHeader:     tt.fields.RequestHeader,
 				OnConnected:       tt.fields.OnConnected,
@@ -496,11 +501,11 @@ func TestNewClient(t *testing.T) {
 			name: "TestNewClient",
 			args: args{
 				ctx:   context.Background(),
-				wsURL: "wss://ws-feed-public.sandbox.exchange.coinbase.com",
+				wsURL: WsURLSandbox,
 			},
 			want: &Client{
 				Ctx:           context.Background(),
-				URL:           "wss://ws-feed-public.sandbox.exchange.coinbase.com",
+				URL:           WsURLSandbox,
 				RequestHeader: http.Header{},
 				ConnectionOptions: ConnOptions{
 					UseCompression: false,

@@ -13,6 +13,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	WsURLSandbox = "wss://ws-feed-public.sandbox.exchange.coinbase.com"
+	ReqString    = `{"type":"subscribe","product_ids":["BTC-USD"],"channels":{ "name": "matches", "product_ids": ["BTC-USD"]}}`
+)
+
+var (
+	ctx       = context.Background()
+	testPair  = []string{"BTC-USD"}
+	testPairs = []string{"BTC-USD", "ETH-USD", "LTC-USD"}
+	logger    = logrus.New()
+)
+
 func TestCoinbaseSteamDataHandler_Handle(t *testing.T) {
 	type fields struct {
 		vwapMaxSize         int
@@ -36,11 +48,11 @@ func TestCoinbaseSteamDataHandler_Handle(t *testing.T) {
 				vwapData:            make(map[string]*vwap.SlidingWindow),
 				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
 				streamer: coinbase.NewStreamer(
-					context.Background(),
-					"wss://ws-feed-public.sandbox.exchange.coinbase.com",
-					"{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[{\"name\":\"matches\",\"product_ids\":[\"BTC-USD\"]}]}",
+					ctx,
+					WsURLSandbox,
+					ReqString,
 				),
-				logger: logrus.New(),
+				logger: logger,
 			},
 			wantErr: false,
 		},
@@ -88,14 +100,14 @@ func TestCoinbaseSteamDataHandler_SetLogger(t *testing.T) {
 				vwapData:            make(map[string]*vwap.SlidingWindow),
 				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
 				streamer: coinbase.NewStreamer(
-					context.Background(),
-					"wss://ws-feed-public.sandbox.exchange.coinbase.com",
-					"{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[{\"name\":\"matches\",\"product_ids\":[\"BTC-USD\"]}]}",
+					ctx,
+					WsURLSandbox,
+					ReqString,
 				),
-				logger: logrus.New(),
+				logger: logger,
 			},
 			args: args{
-				logger: logrus.New(),
+				logger: logger,
 			},
 		},
 	}
@@ -140,11 +152,11 @@ func TestCoinbaseSteamDataHandler_SetMessageBlockerFunc(t *testing.T) {
 				vwapData:            make(map[string]*vwap.SlidingWindow),
 				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
 				streamer: coinbase.NewStreamer(
-					context.Background(),
-					"wss://ws-feed-public.sandbox.exchange.coinbase.com",
-					"{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[{\"name\":\"matches\",\"product_ids\":[\"BTC-USD\"]}]}",
+					ctx,
+					WsURLSandbox,
+					ReqString,
 				),
-				logger: logrus.New(),
+				logger: logger,
 			},
 			args: args{
 				msgBlockerFunc: func(c *vwap.SlidingWindow) error { return nil },
@@ -188,21 +200,21 @@ func TestCoinbaseSteamDataHandler_SetStreamer(t *testing.T) {
 			name: "TestCoinbaseSteamDataHandler_SetStreamer",
 			fields: fields{
 				vwapMaxSize:         10,
-				vwapPairs:           []string{"BTC-USD"},
+				vwapPairs:           testPair,
 				vwapData:            make(map[string]*vwap.SlidingWindow),
 				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
 				streamer: coinbase.NewStreamer(
-					context.Background(),
-					"wss://ws-feed-public.sandbox.exchange.coinbase.com",
-					"{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[{\"name\":\"matches\",\"product_ids\":[\"BTC-USD\"]}]}",
+					ctx,
+					WsURLSandbox,
+					ReqString,
 				),
-				logger: logrus.New(),
+				logger: logger,
 			},
 			args: args{
 				streamer: coinbase.NewStreamer(
-					context.Background(),
-					"wss://ws-feed-public.sandbox.exchange.coinbase.com",
-					"{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[{\"name\":\"matches\",\"product_ids\":[\"BTC-USD\"]}]}",
+					ctx,
+					WsURLSandbox,
+					ReqString,
 				),
 			},
 		},
@@ -249,18 +261,18 @@ func TestCoinbaseSteamDataHandler_processVwapData(t *testing.T) {
 				vwapData:            make(map[string]*vwap.SlidingWindow),
 				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
 				streamer: coinbase.NewStreamer(
-					context.Background(),
-					"wss://ws-feed-public.sandbox.exchange.coinbase.com",
-					"{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[{\"name\":\"matches\",\"product_ids\":[\"BTC-USD\"]}]}",
+					ctx,
+					WsURLSandbox,
+					ReqString,
 				),
-				logger: logrus.New(),
+				logger: logger,
 			},
 			args: args{
 				dataPoint: vwap.DataPoint{
 					Type:      "match",
 					Price:     big.NewFloat(1.0),
 					Size:      big.NewFloat(1.0),
-					ProductId: "BTC-USD",
+					ProductID: "BTC-USD",
 				},
 			},
 			wantErr: false,
@@ -284,7 +296,7 @@ func TestCoinbaseSteamDataHandler_processVwapData(t *testing.T) {
 }
 
 func TestNewStreamDataHandler(t *testing.T) {
-	logger := logrus.New()
+	logger := logger
 	type args struct {
 		maxSize int
 		pairs   []string
@@ -299,11 +311,11 @@ func TestNewStreamDataHandler(t *testing.T) {
 			name: "TestNewStreamDataHandler",
 			args: args{
 				maxSize: 5,
-				pairs:   []string{"BTC-USD", "ETH-USD"},
+				pairs:   testPairs,
 			},
 			want: &CoinbaseSteamDataHandler{
 				vwapMaxSize: 5,
-				vwapPairs:   []string{"BTC-USD", "ETH-USD"},
+				vwapPairs:   testPairs,
 				vwapData:    make(map[string]*vwap.SlidingWindow),
 				logger:      logger,
 			},
@@ -340,8 +352,16 @@ func Test_interfaceToFeedStruct(t *testing.T) {
 
 	var data interface{}
 	feed := coinbase.Feed{}
-	json.Unmarshal([]byte(str), &data)
-	json.Unmarshal([]byte(str), &feed)
+
+	err := json.Unmarshal([]byte(str), &data)
+	if err != nil {
+		t.Errorf("Unmarshal failed %v", err)
+	}
+
+	err = json.Unmarshal([]byte(str), &feed)
+	if err != nil {
+		t.Errorf("Unmarshal failed %v", err)
+	}
 
 	tests := []struct {
 		name    string
