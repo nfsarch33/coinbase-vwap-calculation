@@ -4,7 +4,7 @@ This project is a simple tool for calculating and streaming VWAP prices for give
 
 It's utilizing the [Coinbase websocket API](https://docs.cloud.coinbase.com/exchange/docs/websocket-overview) to fetch the VWAP calculation.
 
-![Coinbase VWAP Price Streamer](./images/live-run-demo.gif)
+![Coinbase VWAP Price Streamer](assets/images/live-run-demo.gif)
 
 # Usage
 
@@ -51,6 +51,11 @@ make test
 
 Run the go tests with coverage and race condition check.
 
+In addition to `go test -race` args, `go.uber.org/goleak` package has been used to perform
+the additional Goroutine leak check.
+
+For more information about `go.uber.org/goleak`, please check goleak docs: https://pkg.go.dev/go.uber.org/goleak
+
 ```
 make lint_ci
 ```
@@ -69,7 +74,7 @@ This installs golangci-lint.
 
 The project is structured as follows:
 
-![Coinbase VWAP Price Streamer project structure](./images/coinbase-vwap-folder-struct-capture.PNG)
+![Coinbase VWAP Price Streamer project structure](assets/images/coinbase-vwap-folder-struct-capture.PNG)
 
 - cmd directory - contains the command line entry point.
 - internal directory - contains the internal components of the project.
@@ -90,7 +95,7 @@ The project is structured as follows:
 
   It's generic, meaning that it can be used for any websocket downstream communications.
 
-  For future extensions, more generic client packages such as general gRPC and REST clients can be added in `internal/client` directory.
+  For future extensions, more generic client packages such as general gRPC and REST clients can be added in `internal/clients` directory.
 
 ### Downstream Services
 
@@ -125,7 +130,7 @@ The project is structured as follows:
   For financial and currency calculations, the precision of the floating point numbers is important to avoid decimal
   fraction problems.
 
-  At ANZ, we use the [anz-bank/decimal](https://github.com/anz-bank/decimal) package to handle the floating point
+  At ANZ, the [anz-bank/decimal](https://github.com/anz-bank/decimal) package is used to handle the floating point
   precision and conversion.
 
   However, since the project is really simple one with only a few calculations upon receiving price data, so we just use

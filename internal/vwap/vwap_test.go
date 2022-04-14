@@ -1,7 +1,11 @@
+//go:build all
+// +build all
+
 package vwap
 
 import (
 	"fmt"
+	"go.uber.org/goleak"
 	"math/big"
 	"reflect"
 	"sync"
@@ -360,6 +364,7 @@ func TestSlidingWindow_Add_Avg(t *testing.T) {
 }
 
 func TestSlidingWindow_Add_Concurrent_Avg(t *testing.T) {
+	defer goleak.VerifyNone(t)
 	type fields struct {
 		currencyPair string
 		dataPoints   []DataPoint
@@ -453,6 +458,7 @@ func TestSlidingWindow_Add_Concurrent_Avg(t *testing.T) {
 }
 
 func TestSlidingWindow_Add_Concurrent_Size(t *testing.T) {
+	defer goleak.VerifyNone(t)
 	type fields struct {
 		currencyPair string
 		dataPoints   []DataPoint

@@ -13,6 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Client is a generic websocket client that build on top of gorilla/websocket package. It implements the event driven
+// pattern and provides a set of simple functions to receive messages.
 type Client struct {
 	Ctx               context.Context
 	Conn              *websocket.Conn
@@ -66,6 +68,8 @@ func (c *Client) setConnectionOptions() {
 	c.WebsocketDialer.Subprotocols = c.ConnectionOptions.SubProtocols
 }
 
+// Connect connects to the websocket server with a given request message, it then pipes the incoming messages to the
+// OnReceivingMsg callback receiver for further processing.
 func (c *Client) Connect() error {
 	var (
 		err    error
@@ -75,6 +79,7 @@ func (c *Client) Connect() error {
 
 	c.setConnectionOptions()
 
+	// Connect to the websocket server.
 	c.Conn, resp, err = c.WebsocketDialer.Dial(c.URL, c.RequestHeader)
 
 	if err != nil {
@@ -85,6 +90,7 @@ func (c *Client) Connect() error {
 
 		c.IsConnected = false
 
+		// Set the OnConnectError callback.
 		if c.OnConnectError != nil {
 			c.OnConnectError(err, *c)
 		}
@@ -99,6 +105,7 @@ func (c *Client) Connect() error {
 
 	logger.Infoln("Connected to server")
 
+	// Set the OnDisconnected callback.
 	defaultCloseHandler := c.Conn.CloseHandler()
 	c.Conn.SetCloseHandler(func(code int, text string) error {
 		result := defaultCloseHandler(code, text)
@@ -142,6 +149,7 @@ func (c *Client) Connect() error {
 				return
 			}
 
+			// Pipe the response message to the OnReceivingMsg callback receiver.
 			if websocket.TextMessage == messageType && c.OnReceivingMsg != nil {
 				c.OnReceivingMsg(string(message), *c)
 			}
@@ -153,6 +161,7 @@ func (c *Client) Connect() error {
 	return nil
 }
 
+// Send is a proxy function of WriteMessage, it sends a message to the websocket server.
 func (c *Client) send(messageType int, data []byte) error {
 	c.sendMu.Lock()
 	defer c.sendMu.Unlock()
@@ -171,6 +180,7 @@ func (c *Client) SendRequest(message string) error {
 	return nil
 }
 
+// Close closes the websocket connection.
 func (c *Client) Close() {
 	logger := c.logger
 
@@ -195,6 +205,7 @@ func (c *Client) Close() {
 		return
 	}
 
+	// Set the OnDisconnected callback.
 	if c.OnDisconnected != nil {
 		c.IsConnected = false
 		c.OnDisconnected(err, *c)

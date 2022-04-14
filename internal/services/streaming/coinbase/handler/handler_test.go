@@ -1,3 +1,6 @@
+//go:build all || integration
+// +build all integration
+
 package handler
 
 import (
@@ -15,7 +18,24 @@ import (
 
 const (
 	WsURLSandbox = "wss://ws-feed-public.sandbox.exchange.coinbase.com"
-	ReqString    = `{"type":"subscribe","product_ids":["BTC-USD"],"channels":{ "name": "matches", "product_ids": ["BTC-USD"]}}`
+	ReqString    = `
+					{
+						"type": "subscribe",
+						"product_ids": [
+							"BTC-USD",
+							"ETH-USD",
+							"ETH-BTC"
+						],
+						"channels": [{
+							"name": "matches",
+							"product_ids": [
+								"BTC-USD",
+								"ETH-USD",
+								"ETH-BTC"
+							]
+						}]
+					}
+					`
 )
 
 var (
@@ -44,7 +64,7 @@ func TestCoinbaseSteamDataHandler_Handle(t *testing.T) {
 			name: "TestCoinbaseSteamDataHandler_Handle",
 			fields: fields{
 				vwapMaxSize:         10,
-				vwapPairs:           []string{"BTC-USD"},
+				vwapPairs:           []string{"BTC-USD", "ETH-USD", "ETH-BTC"},
 				vwapData:            make(map[string]*vwap.SlidingWindow),
 				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
 				streamer: coinbase.NewStreamer(
@@ -70,166 +90,6 @@ func TestCoinbaseSteamDataHandler_Handle(t *testing.T) {
 			if err := h.Handle(); (err != nil) != tt.wantErr {
 				t.Errorf("Handle() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
-	}
-}
-
-func TestCoinbaseSteamDataHandler_SetLogger(t *testing.T) {
-	type fields struct {
-		vwapMaxSize         int
-		vwapPairs           []string
-		vwapData            map[string]*vwap.SlidingWindow
-		messagePipelineFunc func(s *vwap.SlidingWindow) error
-		streamer            streaming.Streamer
-		logger              *logrus.Logger
-	}
-	type args struct {
-		logger *logrus.Logger
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// Add TestCoinbaseSteamDataHandler_SetLogger test cases.
-		{
-			name: "TestCoinbaseSteamDataHandler_SetLogger",
-			fields: fields{
-				vwapMaxSize:         10,
-				vwapPairs:           []string{"BTC-USD"},
-				vwapData:            make(map[string]*vwap.SlidingWindow),
-				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
-				streamer: coinbase.NewStreamer(
-					ctx,
-					WsURLSandbox,
-					ReqString,
-				),
-				logger: logger,
-			},
-			args: args{
-				logger: logger,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := &CoinbaseSteamDataHandler{
-				vwapMaxSize:         tt.fields.vwapMaxSize,
-				vwapPairs:           tt.fields.vwapPairs,
-				vwapData:            tt.fields.vwapData,
-				messagePipelineFunc: tt.fields.messagePipelineFunc,
-				streamer:            tt.fields.streamer,
-				logger:              tt.fields.logger,
-			}
-			h.SetLogger(tt.args.logger)
-		})
-	}
-}
-
-func TestCoinbaseSteamDataHandler_SetMessageBlockerFunc(t *testing.T) {
-	type fields struct {
-		vwapMaxSize         int
-		vwapPairs           []string
-		vwapData            map[string]*vwap.SlidingWindow
-		messagePipelineFunc func(s *vwap.SlidingWindow) error
-		streamer            streaming.Streamer
-		logger              *logrus.Logger
-	}
-	type args struct {
-		msgBlockerFunc func(c *vwap.SlidingWindow) error
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// Add TestCoinbaseSteamDataHandler_SetMessageBlockerFunc test cases.
-		{
-			name: "TestCoinbaseSteamDataHandler_SetMessageBlockerFunc",
-			fields: fields{
-				vwapMaxSize:         10,
-				vwapPairs:           []string{"BTC-USD"},
-				vwapData:            make(map[string]*vwap.SlidingWindow),
-				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
-				streamer: coinbase.NewStreamer(
-					ctx,
-					WsURLSandbox,
-					ReqString,
-				),
-				logger: logger,
-			},
-			args: args{
-				msgBlockerFunc: func(c *vwap.SlidingWindow) error { return nil },
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := &CoinbaseSteamDataHandler{
-				vwapMaxSize:         tt.fields.vwapMaxSize,
-				vwapPairs:           tt.fields.vwapPairs,
-				vwapData:            tt.fields.vwapData,
-				messagePipelineFunc: tt.fields.messagePipelineFunc,
-				streamer:            tt.fields.streamer,
-				logger:              tt.fields.logger,
-			}
-			h.SetMessageBlockerFunc(tt.args.msgBlockerFunc)
-		})
-	}
-}
-
-func TestCoinbaseSteamDataHandler_SetStreamer(t *testing.T) {
-	type fields struct {
-		vwapMaxSize         int
-		vwapPairs           []string
-		vwapData            map[string]*vwap.SlidingWindow
-		messagePipelineFunc func(s *vwap.SlidingWindow) error
-		streamer            streaming.Streamer
-		logger              *logrus.Logger
-	}
-	type args struct {
-		streamer streaming.Streamer
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// Add TestCoinbaseSteamDataHandler_SetStreamer test cases.
-		{
-			name: "TestCoinbaseSteamDataHandler_SetStreamer",
-			fields: fields{
-				vwapMaxSize:         10,
-				vwapPairs:           testPair,
-				vwapData:            make(map[string]*vwap.SlidingWindow),
-				messagePipelineFunc: func(s *vwap.SlidingWindow) error { return nil },
-				streamer: coinbase.NewStreamer(
-					ctx,
-					WsURLSandbox,
-					ReqString,
-				),
-				logger: logger,
-			},
-			args: args{
-				streamer: coinbase.NewStreamer(
-					ctx,
-					WsURLSandbox,
-					ReqString,
-				),
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := &CoinbaseSteamDataHandler{
-				vwapMaxSize:         tt.fields.vwapMaxSize,
-				vwapPairs:           tt.fields.vwapPairs,
-				vwapData:            tt.fields.vwapData,
-				messagePipelineFunc: tt.fields.messagePipelineFunc,
-				streamer:            tt.fields.streamer,
-				logger:              tt.fields.logger,
-			}
-			h.SetStreamer(tt.args.streamer)
 		})
 	}
 }
@@ -379,9 +239,26 @@ func Test_interfaceToFeedStruct(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
+	InterfaceToFeedStruct := func(anyData interface{}) (coinbase.Feed, error) {
+		bytes, err := json.Marshal(anyData)
+		if err != nil {
+			return coinbase.Feed{}, err
+		}
+
+		feed := coinbase.Feed{}
+
+		err = json.Unmarshal(bytes, &feed)
+		if err != nil {
+			return coinbase.Feed{}, err
+		}
+
+		return feed, nil
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := interfaceToFeedStruct(tt.args.anyData)
+			got, err := InterfaceToFeedStruct(tt.args.anyData)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("interfaceToFeedStruct() error = %v, wantErr %v", err, tt.wantErr)
 				return

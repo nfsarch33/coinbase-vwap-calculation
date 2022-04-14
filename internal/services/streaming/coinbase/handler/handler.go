@@ -9,6 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// CoinbaseSteamDataHandler is the implementation of the streaming.DataHandler interface.
+// It is used to handle the incoming data from the Coinbase streaming API wrapped by streamer.
 type CoinbaseSteamDataHandler struct {
 	vwapMaxSize         int
 	vwapPairs           []string
@@ -39,12 +41,15 @@ func (h *CoinbaseSteamDataHandler) GetStreamer() streaming.Streamer {
 	return h.streamer
 }
 
+// SetMessageBlockerFunc SetMessagePipelineFunc sets the function that will be called when a new message is received.
 func (h *CoinbaseSteamDataHandler) SetMessageBlockerFunc(
 	msgBlockerFunc func(c *vwap.SlidingWindow) error,
 ) {
 	h.messagePipelineFunc = msgBlockerFunc
 }
 
+// Handle handles the incoming data from the streamer and pipes it to a messagePipelineFunc
+// that can be implemented later.
 func (h *CoinbaseSteamDataHandler) Handle() error {
 	s := h.streamer
 	streamFeeds := make(chan interface{})
@@ -60,12 +65,11 @@ func (h *CoinbaseSteamDataHandler) Handle() error {
 		for {
 			select {
 			case <-ctx.Done():
-				//h.logger.Warning("Streaming context timed out or canceled.")
 				s.GetClient().Close()
 				return
 			case feed := <-streamFeeds:
-				f, err := interfaceToFeedStruct(feed)
-				//fmt.Printf(f.Type, f.Price, f.Size, f.Time)
+				f, err := InterfaceToFeedStruct(feed)
+
 				if err != nil {
 					h.logger.Errorf("Error converting interface to feed struct %s", err)
 					continue
@@ -99,6 +103,7 @@ func (h *CoinbaseSteamDataHandler) Handle() error {
 	return nil
 }
 
+// processVwapData processes the incoming feed data and updates the vwap data property.
 func (h *CoinbaseSteamDataHandler) processVwapData(dataPoint vwap.DataPoint) error {
 	if _, ok := h.vwapData[dataPoint.ProductID]; !ok {
 		h.vwapData[dataPoint.ProductID] = vwap.NewSlidingWindow(h.vwapMaxSize, dataPoint.ProductID)
@@ -107,14 +112,15 @@ func (h *CoinbaseSteamDataHandler) processVwapData(dataPoint vwap.DataPoint) err
 	h.vwapData[dataPoint.ProductID].Add(dataPoint)
 
 	fmt.Printf(
-		"%v\t:%v\n",
+		"Windows Size: %v\t%v:%v\n",
+		h.vwapData[dataPoint.ProductID].Size(),
 		dataPoint.ProductID,
 		h.vwapData[dataPoint.ProductID].GetCalculator().Avg().String())
 
 	return nil
 }
 
-func interfaceToFeedStruct(anyData interface{}) (coinbase.Feed, error) {
+func InterfaceToFeedStruct(anyData interface{}) (coinbase.Feed, error) {
 	bytes, err := json.Marshal(anyData)
 	if err != nil {
 		return coinbase.Feed{}, err

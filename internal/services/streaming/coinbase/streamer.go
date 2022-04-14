@@ -1,11 +1,10 @@
 package coinbase
 
 import (
-	"context"
-	"encoding/json"
-
 	wsclient "bitbucket.org/keynear/coinbase-vwap-calculation/internal/clients/websocket"
 	"bitbucket.org/keynear/coinbase-vwap-calculation/internal/services/streaming"
+	"context"
+	"encoding/json"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,6 +16,8 @@ const (
 	FeedTypeTicker         = "ticker"
 )
 
+// Streamer is a streaming service for Coinbase. It implements the streaming.Streamer interface.
+// It consists of a websocket client and a message handler streamDataHandler.
 type Streamer struct {
 	ctx               context.Context
 	wsURL             string
@@ -53,13 +54,15 @@ func (s *Streamer) GetContext() context.Context {
 	return s.ctx
 }
 
+// Stream starts the process of subscribing to a channel and streaming feeds from Coinbase, the datapoint is passed to
+// a streamFeeds channel that can be further passed to the stream data handler.
 func (s *Streamer) Stream(
 	streamFeeds chan interface{},
 ) error {
 	client := s.client
 
 	client.OnConnected = func(socket wsclient.Client) {
-		s.logger.Infoln("Connected to server...")
+		s.logger.Infoln("Connected to coinbase server.")
 	}
 
 	client.OnConnectError = func(err error, socket wsclient.Client) {
@@ -72,7 +75,7 @@ func (s *Streamer) Stream(
 		err := json.Unmarshal([]byte(message), &m)
 		if err != nil {
 			s.logger.Errorf("Error unmarshalling message %s", err)
-			
+
 			return
 		}
 
@@ -108,11 +111,13 @@ func (s *Streamer) Stream(
 		}
 	}
 
-	err := client.SendRequest(s.request)
-	if err != nil {
-		s.logger.Errorf("Error sending request %s", err)
+	if client.IsConnected {
+		err := client.SendRequest(s.request)
+		if err != nil {
+			s.logger.Errorf("Error sending request %s", err)
 
-		return err
+			return err
+		}
 	}
 
 	return nil

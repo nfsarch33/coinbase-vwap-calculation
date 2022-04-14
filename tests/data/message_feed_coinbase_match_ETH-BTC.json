@@ -1,0 +1,12 @@
+{
+  "type": "match",
+  "trade_id": 314513776,
+  "maker_order_id": "625cbde9-dc36-4b19-9d0b-5e6c7524ef9d",
+  "taker_order_id": "fed6ff9b-ebab-4b28-9e04-a59851535c46",
+  "side": "buy",
+  "size": "0.00130039",
+  "price": "40128.62",
+  "product_id": "BTC-USD",
+  "sequence": 36325060129,
+  "time": "2022-04-13T12:55:32.062270Z"
+}

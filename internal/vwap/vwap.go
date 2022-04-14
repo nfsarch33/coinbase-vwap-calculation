@@ -8,6 +8,8 @@ import (
 
 var mux sync.Mutex
 
+// SlidingWindow is a struct that holds the sliding window that contains a set of datapoints.
+// A VolumeWeightedAveragePriceCalculator is attached to hold the total volume and the total price.
 type SlidingWindow struct {
 	currencyPair string
 	dataPoints   []DataPoint
@@ -43,6 +45,10 @@ func (sw *SlidingWindow) Length() int {
 	return len(sw.dataPoints)
 }
 
+// Add adds a new datapoint to the sliding window, if it's not full. Otherwise, it removes the oldest datapoint.
+// Whenever it adds or removes a datapoint, it updates the total volume and total price by calling
+// VolumeWeightedAveragePriceCalculator calculator's add and remove methods, and the result is stored in the
+// attached calculator.
 func (sw *SlidingWindow) Add(dataPoint DataPoint) {
 	mux.Lock()
 	defer mux.Unlock()

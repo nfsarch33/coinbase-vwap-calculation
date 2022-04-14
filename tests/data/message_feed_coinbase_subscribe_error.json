@@ -1,0 +1,5 @@
+{
+  "type": "error",
+  "message": "Failed to subscribe",
+  "reason": "ETH-BT is not a valid product"
+}

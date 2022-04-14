@@ -1,3 +1,6 @@
+//go:build all || integration
+// +build all integration
+
 package websocket
 
 import (
@@ -35,6 +38,7 @@ func TestClient_Close(t *testing.T) {
 		receiveMu         *sync.Mutex
 		logger            *logrus.Logger
 	}
+	logger := logrus.New()
 	tests := []struct {
 		name   string
 		fields fields
@@ -59,7 +63,7 @@ func TestClient_Close(t *testing.T) {
 				Timeout:        0,
 				sendMu:         &sync.Mutex{},
 				receiveMu:      &sync.Mutex{},
-				logger:         logrus.New(),
+				logger:         logger,
 			},
 		},
 	}
@@ -82,7 +86,19 @@ func TestClient_Close(t *testing.T) {
 				receiveMu:         tt.fields.receiveMu,
 				logger:            tt.fields.logger,
 			}
+			c.OnDisconnected = func(err error, socket Client) {
+				if err != nil {
+					logger.Errorf("Received disconnect error %s", err)
+				} else {
+					logger.Infoln("Disconnected from server")
+				}
+			}
+
 			c.Close()
+
+			if c.Conn != nil {
+				t.Errorf("Client.Close() Conn = %v, want %v", c.Conn, nil)
+			}
 		})
 	}
 }
@@ -157,6 +173,10 @@ func TestClient_Connect(t *testing.T) {
 			}
 			if err := c.Connect(); (err != nil) != tt.wantErr {
 				t.Errorf("Connect() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if !c.IsConnected {
+				t.Errorf("Connect() IsConnected = %v, want %v", c.IsConnected, true)
 			}
 		})
 	}
@@ -244,84 +264,12 @@ func TestClient_SendRequest(t *testing.T) {
 			if err := c.SendRequest(tt.args.message); (err != nil) != tt.wantErr {
 				t.Errorf("SendRequest() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
-	}
-}
-
-func TestClient_SetLogger(t *testing.T) {
-	type fields struct {
-		Ctx               context.Context
-		Conn              *websocket.Conn
-		WebsocketDialer   *websocket.Dialer
-		URL               string
-		ConnectionOptions ConnOptions
-		RequestHeader     http.Header
-		OnConnected       func(client Client)
-		OnReceivingMsg    func(message string, client Client)
-		OnConnectError    func(err error, client Client)
-		OnDisconnected    func(err error, client Client)
-		IsConnected       bool
-		Timeout           time.Duration
-		sendMu            *sync.Mutex
-		receiveMu         *sync.Mutex
-		logger            *logrus.Logger
-	}
-	type args struct {
-		logger *logrus.Logger
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// Add TestClient_SetLogger test cases.
-		{
-			name: "TestClient_SetLogger",
-			fields: fields{
-				Ctx:             context.Background(),
-				Conn:            nil,
-				WebsocketDialer: &websocket.Dialer{},
-				URL:             WsURLSandbox,
-				ConnectionOptions: ConnOptions{
-					UseCompression: false,
-					UseSSL:         true,
-				},
-				RequestHeader:  http.Header{},
-				OnConnected:    nil,
-				OnReceivingMsg: nil,
-				OnConnectError: nil,
-				OnDisconnected: nil,
-				IsConnected:    false,
-				Timeout:        0,
-				sendMu:         &sync.Mutex{},
-				receiveMu:      &sync.Mutex{},
-				logger:         logrus.New(),
-			},
-			args: args{
-				logger: logrus.New(),
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Client{
-				Ctx:               tt.fields.Ctx,
-				Conn:              tt.fields.Conn,
-				WebsocketDialer:   tt.fields.WebsocketDialer,
-				URL:               tt.fields.URL,
-				ConnectionOptions: tt.fields.ConnectionOptions,
-				RequestHeader:     tt.fields.RequestHeader,
-				OnConnected:       tt.fields.OnConnected,
-				OnReceivingMsg:    tt.fields.OnReceivingMsg,
-				OnConnectError:    tt.fields.OnConnectError,
-				OnDisconnected:    tt.fields.OnDisconnected,
-				IsConnected:       tt.fields.IsConnected,
-				Timeout:           tt.fields.Timeout,
-				sendMu:            tt.fields.sendMu,
-				receiveMu:         tt.fields.receiveMu,
-				logger:            tt.fields.logger,
+			c.OnReceivingMsg = func(message string, socket Client) {
+				t.Logf("Received message: %s", message)
+				if message == "" {
+					t.Errorf("SendRequest() OnReceivingMsg = %v, want %v", message, ReqString)
+				}
 			}
-			c.SetLogger(tt.args.logger)
 		})
 	}
 }
@@ -410,77 +358,6 @@ func TestClient_send(t *testing.T) {
 			if err := c.send(tt.args.messageType, tt.args.data); (err != nil) != tt.wantErr {
 				t.Errorf("send() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
-	}
-}
-
-func TestClient_setConnectionOptions(t *testing.T) {
-	type fields struct {
-		Ctx               context.Context
-		Conn              *websocket.Conn
-		WebsocketDialer   *websocket.Dialer
-		URL               string
-		ConnectionOptions ConnOptions
-		RequestHeader     http.Header
-		OnConnected       func(client Client)
-		OnReceivingMsg    func(message string, client Client)
-		OnConnectError    func(err error, client Client)
-		OnDisconnected    func(err error, client Client)
-		IsConnected       bool
-		Timeout           time.Duration
-		sendMu            *sync.Mutex
-		receiveMu         *sync.Mutex
-		logger            *logrus.Logger
-	}
-	tests := []struct {
-		name   string
-		fields fields
-	}{
-		// Add TestClient_setConnectionOptions test cases.
-		{
-			name: "TestClient_setConnectionOptions",
-			fields: fields{
-				Ctx:             context.Background(),
-				Conn:            nil,
-				WebsocketDialer: &websocket.Dialer{},
-				URL:             WsURLSandbox,
-				ConnectionOptions: ConnOptions{
-					UseCompression: false,
-					UseSSL:         true,
-				},
-				RequestHeader:  http.Header{},
-				OnConnected:    nil,
-				OnReceivingMsg: nil,
-				OnConnectError: nil,
-				OnDisconnected: nil,
-				IsConnected:    false,
-				Timeout:        0,
-				sendMu:         &sync.Mutex{},
-				receiveMu:      &sync.Mutex{},
-				logger:         logrus.New(),
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Client{
-				Ctx:               tt.fields.Ctx,
-				Conn:              tt.fields.Conn,
-				WebsocketDialer:   tt.fields.WebsocketDialer,
-				URL:               tt.fields.URL,
-				ConnectionOptions: tt.fields.ConnectionOptions,
-				RequestHeader:     tt.fields.RequestHeader,
-				OnConnected:       tt.fields.OnConnected,
-				OnReceivingMsg:    tt.fields.OnReceivingMsg,
-				OnConnectError:    tt.fields.OnConnectError,
-				OnDisconnected:    tt.fields.OnDisconnected,
-				IsConnected:       tt.fields.IsConnected,
-				Timeout:           tt.fields.Timeout,
-				sendMu:            tt.fields.sendMu,
-				receiveMu:         tt.fields.receiveMu,
-				logger:            tt.fields.logger,
-			}
-			c.setConnectionOptions()
 		})
 	}
 }
