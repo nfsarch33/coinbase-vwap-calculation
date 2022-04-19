@@ -57,7 +57,7 @@ the additional Goroutine leak check.
 For more information about `go.uber.org/goleak`, please check goleak docs: https://pkg.go.dev/go.uber.org/goleak
 
 ```
-make lint_ci
+make lint
 ```
 
 Run the golangci-lint linter. [golangci-lint](https://golangci-lint.run/) must be installed prior to running this command.
