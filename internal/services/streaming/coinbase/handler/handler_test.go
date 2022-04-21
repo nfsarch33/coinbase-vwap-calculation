@@ -83,7 +83,7 @@ func TestCoinbaseSteamDataHandler_Handle(t *testing.T) {
 				vwapMaxSize:         tt.fields.vwapMaxSize,
 				vwapPairs:           tt.fields.vwapPairs,
 				vwapData:            tt.fields.vwapData,
-				messagePipelineFunc: tt.fields.messagePipelineFunc,
+				MessagePipelineFunc: tt.fields.messagePipelineFunc,
 				streamer:            tt.fields.streamer,
 				logger:              tt.fields.logger,
 			}
@@ -144,7 +144,7 @@ func TestCoinbaseSteamDataHandler_processVwapData(t *testing.T) {
 				vwapMaxSize:         tt.fields.vwapMaxSize,
 				vwapPairs:           tt.fields.vwapPairs,
 				vwapData:            tt.fields.vwapData,
-				messagePipelineFunc: tt.fields.messagePipelineFunc,
+				MessagePipelineFunc: tt.fields.messagePipelineFunc,
 				streamer:            tt.fields.streamer,
 				logger:              tt.fields.logger,
 			}

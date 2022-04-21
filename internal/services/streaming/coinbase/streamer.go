@@ -61,6 +61,9 @@ func (s *Streamer) Stream(
 ) error {
 	client := s.client
 
+	var cancel context.CancelFunc
+	s.ctx, cancel = context.WithCancel(s.GetContext())
+
 	client.OnConnected = func(socket wsclient.Client) {
 		s.logger.Infoln("Connected to coinbase server.")
 	}
@@ -75,7 +78,6 @@ func (s *Streamer) Stream(
 		err := json.Unmarshal([]byte(message), &m)
 		if err != nil {
 			s.logger.Errorf("Error unmarshalling message %s", err)
-
 			return
 		}
 
@@ -83,11 +85,17 @@ func (s *Streamer) Stream(
 		if m.Type == FeedTypeSubscribeError {
 			s.logger.Errorf("Received subscribe error type: %v error: %v", m.Type, m)
 			s.logger.Errorf("Reason: %v", m.Reason)
-
+			cancel()
 			return
 		}
 
 		go func() {
+			// This is to prevent race condition upon connection error or closed connection.
+			if !client.IsConnected || client.OnConnected == nil {
+				cancel()
+				return
+			}
+
 			if m.Type == FeedTypeMatch || m.Type == FeedTypeLastMatch {
 				streamFeeds <- m
 			}
@@ -124,7 +132,8 @@ func (s *Streamer) Stream(
 }
 
 func (s *Streamer) Stop() {
-	_, cancel := context.WithCancel(s.ctx)
+	var cancel context.CancelFunc
+	s.ctx, cancel = context.WithCancel(s.ctx)
 	defer cancel()
 
 	if s.client.IsConnected {

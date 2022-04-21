@@ -15,7 +15,7 @@ type CoinbaseSteamDataHandler struct {
 	vwapMaxSize         int
 	vwapPairs           []string
 	vwapData            map[string]*vwap.SlidingWindow
-	messagePipelineFunc func(s *vwap.SlidingWindow) error
+	MessagePipelineFunc func(s *vwap.SlidingWindow) error
 	streamer            streaming.Streamer
 	logger              *logrus.Logger
 }
@@ -45,10 +45,10 @@ func (h *CoinbaseSteamDataHandler) GetStreamer() streaming.Streamer {
 func (h *CoinbaseSteamDataHandler) SetMessageBlockerFunc(
 	msgBlockerFunc func(c *vwap.SlidingWindow) error,
 ) {
-	h.messagePipelineFunc = msgBlockerFunc
+	h.MessagePipelineFunc = msgBlockerFunc
 }
 
-// Handle handles the incoming data from the streamer and pipes it to a messagePipelineFunc
+// Handle handles the incoming data from the streamer and pipes it to a MessagePipelineFunc
 // that can be implemented later.
 func (h *CoinbaseSteamDataHandler) Handle() error {
 	s := h.streamer
@@ -65,6 +65,7 @@ func (h *CoinbaseSteamDataHandler) Handle() error {
 		for {
 			select {
 			case <-ctx.Done():
+				close(streamFeeds)
 				s.GetClient().Close()
 				return
 			case feed := <-streamFeeds:
@@ -89,8 +90,8 @@ func (h *CoinbaseSteamDataHandler) Handle() error {
 				}
 
 				// TODO: Implement message pipeline function to send it to the message blocker or DB.
-				if h.messagePipelineFunc != nil {
-					err := h.messagePipelineFunc(h.vwapData[dataPoint.ProductID])
+				if h.MessagePipelineFunc != nil {
+					err := h.MessagePipelineFunc(h.vwapData[dataPoint.ProductID])
 					if err != nil {
 						h.logger.Errorf("Error processing vwap data %s", err)
 						continue

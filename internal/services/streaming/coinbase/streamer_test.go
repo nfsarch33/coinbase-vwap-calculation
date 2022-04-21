@@ -231,7 +231,7 @@ func TestStreamer_Stream(t *testing.T) {
 				streamDataHandler: tt.fields.streamDataHandler,
 				logger:            tt.fields.logger,
 			}
-			_, cancel := context.WithCancel(s.ctx)
+			defer close(tt.args.streamFeeds)
 			defer s.Stop()
 			if err := s.Stream(tt.args.streamFeeds); (err != nil) != tt.wantErr {
 				t.Errorf("Stream() error = %v, wantErr %v", err, tt.wantErr)
@@ -243,9 +243,6 @@ func TestStreamer_Stream(t *testing.T) {
 
 			for {
 				if count >= maxDataPoints {
-					s.Stop()
-					cancel()
-
 					break
 				}
 
